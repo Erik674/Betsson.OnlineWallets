@@ -34,6 +34,11 @@ namespace Betsson.OnlineWallets.Services
 
         public async Task<Balance> DepositFundsAsync(Deposit deposit)
         {
+            if (deposit.Amount <= 0)
+            {
+                throw new InvalidDepositAmountException();
+            }
+
             decimal depositAmount = deposit.Amount;
 
             Balance currentBalance = await GetBalanceAsync();

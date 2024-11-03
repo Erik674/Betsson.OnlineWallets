@@ -28,7 +28,7 @@ namespace Betsson.OnlineWallets.OnlineWalletServiceTests
         [TestCase(50, 50, ExpectedResult = 0)]
         public async Task<decimal> WithdrawFundsAsync_ShouldReturnCorrectBalance_WhenWithdrawalIsSuccessful(decimal initialBalance, decimal withdrawalAmount)
         {
-            // Set up the mock to return a balance of 50
+            // Set up the mock to return an initial balance
             _mockRepository.Setup(repo => repo.GetLastOnlineWalletEntryAsync())
                            .ReturnsAsync(new OnlineWalletEntry { BalanceBefore = initialBalance, Amount = 0 });
 
@@ -60,13 +60,46 @@ namespace Betsson.OnlineWallets.OnlineWalletServiceTests
         [TestCase(-1)]
         public void WithdrawFundsAsync_ShouldThrowInvalidWithdrawalAmountException_WhenWithdrawalAmountIsInvalid(decimal withdrawalAmount)
         {
-            // Set up the mock to return a balance
+            // Set up the mock to return an initial balance
             _mockRepository.Setup(repo => repo.GetLastOnlineWalletEntryAsync())
                            .ReturnsAsync(new OnlineWalletEntry { BalanceBefore = It.IsAny<decimal>(), Amount = 0 });
 
             // Act & Assert
             Assert.ThrowsAsync<InvalidWithdrawalAmountException>(
                 async () => await _service.WithdrawFundsAsync(new Withdrawal { Amount = withdrawalAmount }));
+        }
+    }
+
+    [TestFixture]
+    internal class DepositFundsAsyncTests : OnlineWalletServiceTestSetup
+    {
+        [TestCase(50, 25, ExpectedResult = 75)]
+        [TestCase(0, 50, ExpectedResult = 50)]
+        public async Task<decimal> DepositFundsAsync_ShouldReturnCorrectBalance_WhenDepositIsSuccessful(decimal initialBalance, decimal depositAmount)
+        {
+            // Set up the mock to return an initial balance
+            _mockRepository.Setup(repo => repo.GetLastOnlineWalletEntryAsync())
+                           .ReturnsAsync(new OnlineWalletEntry { BalanceBefore = initialBalance, Amount = 0 });
+
+            // Act
+            var result = await _service.DepositFundsAsync(new Deposit { Amount = depositAmount });
+
+            // Assert
+            _mockRepository.Verify(repo => repo.InsertOnlineWalletEntryAsync(It.IsAny<OnlineWalletEntry>()), Times.AtLeastOnce);
+            return result.Amount;
+        }
+
+        [TestCase(0)]
+        [TestCase(-1)]
+        public void DepositFundsAsync_ShouldThrowInvalidDepositAmountException_WhenDepositAmountIsInvalid(decimal depositAmount)
+        {
+            // Set up the mock to return an initial balance
+            _mockRepository.Setup(repo => repo.GetLastOnlineWalletEntryAsync())
+                           .ReturnsAsync(new OnlineWalletEntry { BalanceBefore = It.IsAny<decimal>(), Amount = 0 });
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidDepositAmountException>(
+                async () => await _service.DepositFundsAsync(new Deposit { Amount = depositAmount }));
         }
     }
 }
