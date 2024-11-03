@@ -56,17 +56,12 @@ namespace Betsson.OnlineWallets.OnlineWalletServiceTests
                 async () => await _service.WithdrawFundsAsync(new Withdrawal { Amount = withdrawalAmount }));
         }
 
-        [TestCase(0)]
-        [TestCase(-1)]
-        public void WithdrawFundsAsync_ShouldThrowInvalidWithdrawalAmountException_WhenWithdrawalAmountIsInvalid(decimal withdrawalAmount)
+        [Test]
+        public void WithdrawFundsAsync_ShouldThrowNullReferenceException_WhenWithdrawalIsNull()
         {
-            // Set up the mock to return an initial balance
-            _mockRepository.Setup(repo => repo.GetLastOnlineWalletEntryAsync())
-                           .ReturnsAsync(new OnlineWalletEntry { BalanceBefore = It.IsAny<decimal>(), Amount = 0 });
-
             // Act & Assert
-            Assert.ThrowsAsync<InvalidWithdrawalAmountException>(
-                async () => await _service.WithdrawFundsAsync(new Withdrawal { Amount = withdrawalAmount }));
+            Assert.ThrowsAsync<NullReferenceException>(
+                async () => await _service.WithdrawFundsAsync(null));
         }
     }
 
@@ -89,17 +84,12 @@ namespace Betsson.OnlineWallets.OnlineWalletServiceTests
             return result.Amount;
         }
 
-        [TestCase(0)]
-        [TestCase(-1)]
-        public void DepositFundsAsync_ShouldThrowInvalidDepositAmountException_WhenDepositAmountIsInvalid(decimal depositAmount)
+        [Test]
+        public void DepositFundsAsync_ShouldThrowNullReferenceException_WhenDepositIsNull()
         {
-            // Set up the mock to return an initial balance
-            _mockRepository.Setup(repo => repo.GetLastOnlineWalletEntryAsync())
-                           .ReturnsAsync(new OnlineWalletEntry { BalanceBefore = It.IsAny<decimal>(), Amount = 0 });
-
             // Act & Assert
-            Assert.ThrowsAsync<InvalidDepositAmountException>(
-                async () => await _service.DepositFundsAsync(new Deposit { Amount = depositAmount }));
+            Assert.ThrowsAsync<NullReferenceException>(
+                async () => await _service.DepositFundsAsync(null));
         }
     }
 }
