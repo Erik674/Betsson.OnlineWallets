@@ -92,4 +92,41 @@ namespace Betsson.OnlineWallets.OnlineWalletServiceTests
                 async () => await _service.DepositFundsAsync(null));
         }
     }
+
+    [TestFixture]
+    internal class GetBalanceAsyncTests : OnlineWalletServiceTestSetup
+    {
+        [Test]
+        public async Task GetBalanceAsync_ShouldReturnZero_WhenNoTransactionsExist()
+        {
+            // Arrange
+            _mockRepository.Setup(repo => repo.GetLastOnlineWalletEntryAsync())
+                           .ReturnsAsync((OnlineWalletEntry)null); // Simulate no entries
+
+            // Act
+            Balance result = await _service.GetBalanceAsync();
+
+            // Assert
+            Assert.That(result.Amount, Is.EqualTo(0), "Expected balance to be 0 when there are no transactions.");
+        }
+
+        [Test]
+        public async Task GetBalanceAsync_ShouldReturnCorrectBalance_WhenTransactionExists()
+        {
+            // Arrange
+            var onlineWalletEntry = new OnlineWalletEntry
+            {
+                BalanceBefore = 100m,
+                Amount = 50m // Total should be 150
+            };
+            _mockRepository.Setup(repo => repo.GetLastOnlineWalletEntryAsync())
+                           .ReturnsAsync(onlineWalletEntry); // Simulate an existing entry
+
+            // Act
+            Balance result = await _service.GetBalanceAsync();
+
+            // Assert
+            Assert.That(result.Amount, Is.EqualTo(150m), "Expected balance to be the sum of BalanceBefore and Amount.");
+        }
+    }
 }
