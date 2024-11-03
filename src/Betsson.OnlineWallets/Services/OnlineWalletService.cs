@@ -58,6 +58,11 @@ namespace Betsson.OnlineWallets.Services
 
         public async Task<Balance> WithdrawFundsAsync(Withdrawal withdrawal)
         {
+            if (withdrawal.Amount <= 0)
+            {
+                throw new InvalidWithdrawalAmountException();
+            }
+
             decimal withdrawalAmount = withdrawal.Amount;
             Balance currentBalance = await GetBalanceAsync();
             decimal currentBalanceAmount = currentBalance.Amount;
